@@ -1,3 +1,4 @@
+// Definir los tipos para el mapa para evitar errores
 export interface Coordinates {
   latitude: number
   longitude: number

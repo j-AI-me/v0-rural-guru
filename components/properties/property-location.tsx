@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Navigation } from 'lucide-react'
+import { MapPin, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { MapMarker } from "@/types/map"
 
 // Dynamically import the map component with no SSR
 const DynamicInteractiveMap = dynamic(
   () => import("@/components/map/interactive-map").then((mod) => mod.InteractiveMap),
-  { ssr: false }
+  { ssr: false },
 )
 
 interface PropertyLocationProps {
@@ -30,7 +30,7 @@ export function PropertyLocation({ property, height = "300px" }: PropertyLocatio
 
   useEffect(() => {
     setIsMounted(true)
-    
+
     if (property.latitude && property.longitude) {
       setMarker({
         id: property.id,
@@ -44,10 +44,10 @@ export function PropertyLocation({ property, height = "300px" }: PropertyLocatio
   }, [property])
 
   const openDirections = () => {
-    if (typeof window !== 'undefined' && property.latitude && property.longitude) {
+    if (typeof window !== "undefined" && property.latitude && property.longitude) {
       window.open(
         `https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`,
-        "_blank"
+        "_blank",
       )
     }
   }

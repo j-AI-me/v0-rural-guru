@@ -63,14 +63,20 @@
     "nodemailer": "latest",
     "immer": "latest",
     "use-sync-external-store": "latest",
+    "@supabase/supabase-js": "latest",
     "react-i18next": "latest",
     "next-auth": "latest",
-    "@supabase/supabase-js": "latest",
     "@vercel/blob": "latest",
     "i18next-browser-languagedetector": "latest",
     "i18next-http-backend": "latest",
     "zustand": "latest",
-    "leaflet": "latest"
+    "@supabase/auth-helpers-nextjs": "latest",
+    "isomorphic-dompurify": "latest",
+    "child_process": "latest",
+    "fs": "latest",
+    "path": "latest",
+    "uuid": "latest",
+    "crypto": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
