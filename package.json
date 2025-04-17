@@ -71,12 +71,12 @@
     "i18next-http-backend": "latest",
     "zustand": "latest",
     "@supabase/auth-helpers-nextjs": "latest",
-    "isomorphic-dompurify": "latest",
     "child_process": "latest",
     "fs": "latest",
     "path": "latest",
     "uuid": "latest",
-    "crypto": "latest"
+    "crypto": "latest",
+    "isomorphic-dompurify": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

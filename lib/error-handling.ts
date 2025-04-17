@@ -93,20 +93,9 @@ export function handleApiError(error: any) {
   )
 }
 
-// Función para registrar errores
+// Simple error logging function
 export function logError(error: any, context?: string) {
-  const timestamp = new Date().toISOString()
-  const errorContext = context ? ` [${context}]` : ""
-
-  console.error(`[${timestamp}]${errorContext} Error:`, {
-    name: error.name,
-    message: error.message,
-    ...(error.statusCode && { statusCode: error.statusCode }),
-    ...(error.code && { code: error.code }),
-    ...(process.env.NODE_ENV !== "production" && { stack: error.stack }),
-  })
-
-  // Aquí se podría integrar con servicios de monitoreo como Sentry
+  console.error(`Error ${context ? `in ${context}` : ""}:`, error)
 }
 
 // Wrapper para funciones asíncronas
