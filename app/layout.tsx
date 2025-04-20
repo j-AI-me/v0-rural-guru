@@ -1,10 +1,9 @@
 import type React from "react"
-import type { Metadata } from "next"
 import "./globals.css"
 
-export const metadata: Metadata = {
-  title: "RuralGuru - Alojamientos rurales en Asturias",
-  description: "Encuentra el alojamiento rural perfecto para tus vacaciones en Asturias",
+export const metadata = {
+  title: "RuralGuru",
+  description: "Alojamientos rurales en Asturias",
     generator: 'v0.dev'
 }
 
