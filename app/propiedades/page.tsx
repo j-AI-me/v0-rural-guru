@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { MapPinIcon, Search, Filter } from "lucide-react"
-import { createServerClient } from "@/lib/supabase"
 
 // Función para obtener propiedades desde Supabase
 async function getProperties() {
+  "use server"
+
+  const { createServerClient } = await import("@/lib/supabase")
   const supabase = createServerClient()
 
   const { data, error } = await supabase

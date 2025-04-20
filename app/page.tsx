@@ -7,12 +7,14 @@ import { CalendarIcon, MapPinIcon, Search, Users } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
-import { createServerClient } from "@/lib/supabase"
 import { PropertyCard } from "@/components/property-card"
 import { NavAuthButtons } from "@/components/nav-auth-buttons"
 
-// Función para obtener propiedades destacadas
+// Marcamos la función como asíncrona y la separamos para evitar pasarla directamente al componente
 async function getFeaturedProperties() {
+  "use server"
+
+  const { createServerClient } = await import("@/lib/supabase")
   const supabase = createServerClient()
 
   const { data, error } = await supabase
@@ -32,6 +34,43 @@ async function getFeaturedProperties() {
 
 export default async function Home() {
   const featuredProperties = await getFeaturedProperties()
+
+  // Propiedades de ejemplo para usar si no hay datos en Supabase
+  const exampleProperties = [
+    {
+      id: 1,
+      title: "Casa rural en Covadonga",
+      location: "Covadonga, Asturias",
+      price: 120,
+      description: "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga.",
+      image: "/asturian-countryside-home.png",
+      bedrooms: 3,
+      bathrooms: 2,
+      capacity: 6,
+    },
+    {
+      id: 2,
+      title: "Apartamento en Llanes",
+      location: "Llanes, Asturias",
+      price: 85,
+      description: "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias.",
+      image: "/llanes-apartment-balcony-view.png",
+      bedrooms: 1,
+      bathrooms: 1,
+      capacity: 4,
+    },
+    {
+      id: 3,
+      title: "Cabaña en Cangas de Onís",
+      location: "Cangas de Onís, Asturias",
+      price: 95,
+      description: "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís.",
+      image: "/asturian-cabin-retreat.png",
+      bedrooms: 2,
+      bathrooms: 1,
+      capacity: 5,
+    },
+  ]
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -178,45 +217,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProperties.length > 0
               ? featuredProperties.map((property) => <PropertyCard key={property.id} property={property} />)
-              : // Propiedades de ejemplo si no hay datos en Supabase
-                [
-                  {
-                    id: 1,
-                    title: "Casa rural en Covadonga",
-                    location: "Covadonga, Asturias",
-                    price: 120,
-                    description:
-                      "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga.",
-                    image: "/asturian-countryside-home.png",
-                    bedrooms: 3,
-                    bathrooms: 2,
-                    capacity: 6,
-                  },
-                  {
-                    id: 2,
-                    title: "Apartamento en Llanes",
-                    location: "Llanes, Asturias",
-                    price: 85,
-                    description:
-                      "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias.",
-                    image: "/llanes-apartment-balcony-view.png",
-                    bedrooms: 1,
-                    bathrooms: 1,
-                    capacity: 4,
-                  },
-                  {
-                    id: 3,
-                    title: "Cabaña en Cangas de Onís",
-                    location: "Cangas de Onís, Asturias",
-                    price: 95,
-                    description:
-                      "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís.",
-                    image: "/asturian-cabin-retreat.png",
-                    bedrooms: 2,
-                    bathrooms: 1,
-                    capacity: 5,
-                  },
-                ].map((property) => <PropertyCard key={property.id} property={property} />)}
+              : exampleProperties.map((property) => <PropertyCard key={property.id} property={property} />)}
           </div>
         </section>
       </main>

@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PropertyGallery } from "@/components/property-gallery"
 import { BookingSystem } from "@/components/booking-system"
 import { Bath, Bed, Coffee, Home, Info, MapPin, MessageSquare, Star, Users, Wifi, Wind } from "lucide-react"
-import { createServerClient } from "@/lib/supabase"
 import { notFound } from "next/navigation"
 
 // Función para obtener una propiedad por ID
 async function getProperty(id: string) {
+  "use server"
+
+  const { createServerClient } = await import("@/lib/supabase")
   const supabase = createServerClient()
 
   const { data, error } = await supabase.from("properties").select("*").eq("id", id).single()
@@ -133,7 +135,9 @@ export default async function PropertyPage({ params }: { params: { id: string } 
             <h2 className="text-xl font-semibold mb-4">Descripción</h2>
             <div className="space-y-4 text-gray-700">
               {property.long_description ? (
-                property.long_description.split("\n\n").map((paragraph, index) => <p key={index}>{paragraph}</p>)
+                property.long_description
+                  .split("\n\n")
+                  .map((paragraph: string, index: number) => <p key={index}>{paragraph}</p>)
               ) : (
                 <p>{property.description}</p>
               )}
