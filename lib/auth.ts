@@ -1,12 +1,12 @@
-import { createServerClient } from "@/lib/supabase"
-import { cookies } from "next/headers"
+"use server"
+
+import { createServerClientWithCookies } from "@/lib/supabase"
 import { redirect } from "next/navigation"
 import type { Session } from "@supabase/supabase-js"
 
 // Obtener la sesión del usuario actual desde el servidor
 export async function getSession(): Promise<Session | null> {
-  const cookieStore = cookies()
-  const supabase = createServerClient()
+  const supabase = createServerClientWithCookies()
 
   const {
     data: { session },
@@ -44,7 +44,7 @@ export async function getCurrentUserProfile() {
     return null
   }
 
-  const supabase = createServerClient()
+  const supabase = createServerClientWithCookies()
   const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
 
   return data

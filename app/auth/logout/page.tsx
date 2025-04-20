@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { getSupabaseBrowserClient } from "@/lib/supabase"
+import { createBrowserClient } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 
 export default function LogoutPage() {
@@ -10,7 +10,7 @@ export default function LogoutPage() {
 
   useEffect(() => {
     const logout = async () => {
-      const supabase = getSupabaseBrowserClient()
+      const supabase = createBrowserClient()
       await supabase.auth.signOut()
       router.push("/")
       router.refresh()

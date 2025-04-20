@@ -2,47 +2,12 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
+import { useAuth } from "@/components/auth/auth-provider"
 
 export function NavAuthButtons() {
-  const [session, setSession] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, isLoading } = useAuth()
 
-  useEffect(() => {
-    // Importar el cliente de Supabase dinámicamente para evitar problemas de SSR
-    const fetchSession = async () => {
-      try {
-        // Importación dinámica para evitar problemas de SSR
-        const { createClient } = await import("@supabase/supabase-js")
-
-        // Crear cliente directamente aquí en lugar de importar una función
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-        const { data } = await supabase.auth.getSession()
-        setSession(data.session)
-
-        // Suscribirse a cambios en la autenticación
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-          setSession(session)
-        })
-
-        setLoading(false)
-
-        return () => {
-          authListener?.subscription.unsubscribe()
-        }
-      } catch (error) {
-        console.error("Error fetching session:", error)
-        setLoading(false)
-      }
-    }
-
-    fetchSession()
-  }, [])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center gap-4">
         <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>
@@ -51,7 +16,7 @@ export function NavAuthButtons() {
     )
   }
 
-  if (session) {
+  if (user) {
     return (
       <div className="flex items-center gap-4">
         <Link href="/dashboard">

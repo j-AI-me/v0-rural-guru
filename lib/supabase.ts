@@ -1,23 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-
-// Creamos un cliente de Supabase para el lado del cliente
-export const createBrowserClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-  return createClient(supabaseUrl, supabaseAnonKey)
-}
-
-// Singleton para el cliente del navegador
-let browserClient: ReturnType<typeof createBrowserClient> | null = null
-
-// Función para obtener el cliente de Supabase en el navegador
-export const getSupabaseBrowserClient = () => {
-  if (!browserClient) {
-    browserClient = createBrowserClient()
-  }
-  return browserClient
-}
+import { cookies } from "next/headers"
 
 // Función para crear un cliente de Supabase en el servidor
 export const createServerClient = () => {
@@ -31,3 +13,29 @@ export const createServerClient = () => {
     },
   })
 }
+
+// Función para crear un cliente de Supabase con cookies (para autenticación en el servidor)
+export const createServerClientWithCookies = () => {
+  const cookieStore = cookies()
+
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name) {
+        return cookieStore.get(name)?.value
+      },
+    },
+  })
+}
+
+// Exportamos una función para el cliente que se usará en componentes cliente
+export const createBrowserClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
+
+export const getSupabaseBrowserClient = createBrowserClient
