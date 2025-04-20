@@ -17,16 +17,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Configuración para el comportamiento de renderizado
-  experimental: {
-    appDir: true,
-    serverActions: true,
-  },
-  // Configuración de variables de entorno públicas
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  },
+  // Desactivar la minimización para depurar problemas
+  swcMinify: false,
 }
 
 export default nextConfig

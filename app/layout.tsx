@@ -3,12 +3,6 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/components/auth/auth-provider"
-import SupabaseProvider from "./supabase-provider"
-import { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion } from "./config"
-
-// Exportar la configuración
-export { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion }
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -27,9 +21,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <SupabaseProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </SupabaseProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

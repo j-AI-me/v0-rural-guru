@@ -1,8 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-export const dynamic = "force-dynamic"
-
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -14,14 +12,10 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth/login">
-              <Button variant="ghost" className="text-sm">
-                Iniciar sesión
-              </Button>
-            </Link>
-            <Link href="/auth/registro">
-              <Button className="text-sm bg-black hover:bg-gray-800">Registrarse</Button>
-            </Link>
+            <Button variant="ghost" className="text-sm">
+              Iniciar sesión
+            </Button>
+            <Button className="text-sm bg-black hover:bg-gray-800">Registrarse</Button>
           </div>
         </div>
       </header>
@@ -31,12 +25,8 @@ export default function Home() {
           <h1 className="text-4xl font-bold mb-4">Bienvenido a RuralGuru</h1>
           <p className="text-xl mb-8">Tu plataforma para encontrar alojamientos rurales en Asturias</p>
           <div className="flex gap-4 justify-center">
-            <Link href="/propiedades">
-              <Button className="bg-black hover:bg-gray-800">Ver propiedades</Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button variant="outline">Ir al dashboard</Button>
-            </Link>
+            <Button className="bg-black hover:bg-gray-800">Ver propiedades</Button>
+            <Button variant="outline">Ir al dashboard</Button>
           </div>
         </div>
       </main>
