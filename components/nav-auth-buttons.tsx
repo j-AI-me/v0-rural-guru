@@ -2,26 +2,27 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 
 export function NavAuthButtons() {
-  const [isClient, setIsClient] = useState(false)
+  // Usamos un estado simple para manejar la hidratación
+  const [mounted, setMounted] = useState(false)
 
-  // Usar useEffect para evitar problemas de hidratación
   useEffect(() => {
-    setIsClient(true)
+    setMounted(true)
   }, [])
 
-  // No renderizar nada durante la hidratación para evitar errores
-  if (!isClient) {
+  // Mientras no esté montado, mostramos un esqueleto
+  if (!mounted) {
     return (
       <div className="flex items-center gap-4">
-        <div className="h-9 w-20 bg-gray-200 rounded-md"></div>
-        <div className="h-9 w-24 bg-gray-800 rounded-md"></div>
+        <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>
+        <div className="h-9 w-24 bg-gray-800 animate-pulse rounded-md"></div>
       </div>
     )
   }
 
+  // Una vez montado, mostramos los botones reales
   return (
     <div className="flex items-center gap-4">
       <Link href="/auth/login">

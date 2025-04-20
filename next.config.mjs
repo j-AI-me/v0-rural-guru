@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Configuración básica
   reactStrictMode: true,
+  
   // Ignorar errores durante la compilación para facilitar el despliegue
   eslint: {
     ignoreDuringBuilds: true,
@@ -8,9 +10,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Configuración de imágenes simplificada
+  
+  // Configuración de imágenes optimizada
   images: {
-    unoptimized: true,
+    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -18,9 +21,8 @@ const nextConfig = {
       },
     ],
   },
-  // Desactivar algunas optimizaciones que podrían causar problemas
-  swcMinify: false,
-  // Asegurarse de que las Server Actions estén habilitadas
+  
+  // Habilitar Server Actions
   experimental: {
     serverActions: true,
   },
