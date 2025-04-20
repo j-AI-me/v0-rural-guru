@@ -22,16 +22,20 @@ export default function SupabaseProvider({
 
   // Inicializar Supabase solo en el lado del cliente
   useEffect(() => {
-    const client = createBrowserClient()
-    setSupabase(client)
+    try {
+      const client = createBrowserClient()
+      setSupabase(client)
 
-    // Escuchar cambios de autenticación para refrescar la página
-    const { data: authListener } = client.auth.onAuthStateChange(() => {
-      router.refresh()
-    })
+      // Escuchar cambios de autenticación para refrescar la página
+      const { data: authListener } = client.auth.onAuthStateChange(() => {
+        router.refresh()
+      })
 
-    return () => {
-      authListener?.subscription.unsubscribe()
+      return () => {
+        authListener?.subscription.unsubscribe()
+      }
+    } catch (error) {
+      console.error("Error al inicializar Supabase:", error)
     }
   }, [router])
 

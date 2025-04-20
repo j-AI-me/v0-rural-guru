@@ -5,6 +5,10 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import SupabaseProvider from "./supabase-provider"
+import { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion } from "./config"
+
+// Exportar la configuración
+export { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion }
 
 const inter = Inter({ subsets: ["latin"] })
 

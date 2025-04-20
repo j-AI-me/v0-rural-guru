@@ -2,6 +2,10 @@ import type React from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { requireAuth } from "@/lib/auth"
+import { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion } from "../config"
+
+// Exportar la configuración
+export { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion }
 
 export default async function DashboardLayout({
   children,
