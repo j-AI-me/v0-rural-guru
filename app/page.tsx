@@ -48,6 +48,8 @@ const exampleProperties = [
   },
 ]
 
+export const dynamic = "force-dynamic"
+
 export default async function Home() {
   // Obtener propiedades destacadas directamente en el componente
   let featuredProperties = []
