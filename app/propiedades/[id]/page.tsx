@@ -6,22 +6,7 @@ import { PropertyGallery } from "@/components/property-gallery"
 import { BookingSystem } from "@/components/booking-system"
 import { Bath, Bed, Coffee, Home, Info, MapPin, MessageSquare, Star, Users, Wifi, Wind } from "lucide-react"
 import { notFound } from "next/navigation"
-
-// Función para obtener una propiedad por ID
-async function getProperty(id: string) {
-  "use server"
-
-  const { createServerClient } = await import("@/lib/supabase")
-  const supabase = createServerClient()
-
-  const { data, error } = await supabase.from("properties").select("*").eq("id", id).single()
-
-  if (error || !data) {
-    return null
-  }
-
-  return data
-}
+import { createServerClient } from "@/lib/supabase"
 
 // Datos de ejemplo para las reseñas (en una implementación real, vendrían de la base de datos)
 const sampleReviews = [
@@ -56,7 +41,17 @@ const sampleReviews = [
 
 export default async function PropertyPage({ params }: { params: { id: string } }) {
   // Obtener la propiedad de la base de datos
-  const property = await getProperty(params.id)
+  let property = null
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase.from("properties").select("*").eq("id", params.id).single()
+
+    if (!error && data) {
+      property = data
+    }
+  } catch (error) {
+    console.error("Error fetching property:", error)
+  }
 
   if (!property) {
     notFound()

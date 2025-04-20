@@ -4,30 +4,101 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { MapPinIcon, Search, Filter } from "lucide-react"
+import { createServerClient } from "@/lib/supabase"
 
-// Función para obtener propiedades desde Supabase
-async function getProperties() {
-  "use server"
-
-  const { createServerClient } = await import("@/lib/supabase")
-  const supabase = createServerClient()
-
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching properties:", error)
-    return []
-  }
-
-  return data || []
-}
+// Propiedades de ejemplo para usar si no hay datos en Supabase
+const exampleProperties = [
+  {
+    id: 1,
+    title: "Casa rural en Covadonga",
+    location: "Covadonga, Asturias",
+    price: 120,
+    description:
+      "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga. Ideal para familias y amantes de la naturaleza.",
+    image: "/asturian-countryside-home.png",
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+  },
+  {
+    id: 2,
+    title: "Apartamento en Llanes",
+    location: "Llanes, Asturias",
+    price: 85,
+    description:
+      "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias. Perfecto para parejas.",
+    image: "/llanes-apartment-balcony-view.png",
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 4,
+  },
+  {
+    id: 3,
+    title: "Cabaña en Cangas de Onís",
+    location: "Cangas de Onís, Asturias",
+    price: 95,
+    description:
+      "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís. Disfruta de la tranquilidad y la naturaleza.",
+    image: "/asturian-cabin-retreat.png",
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 5,
+  },
+  {
+    id: 4,
+    title: "Casa de piedra en Ribadesella",
+    location: "Ribadesella, Asturias",
+    price: 110,
+    description:
+      "Tradicional casa de piedra completamente restaurada en Ribadesella. A 10 minutos de la playa y con vistas al mar Cantábrico.",
+    image: "/ribadesella-stone-house.png",
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+  },
+  {
+    id: 5,
+    title: "Apartamento rural en Gijón",
+    location: "Gijón, Asturias",
+    price: 75,
+    description:
+      "Acogedor apartamento rural en las afueras de Gijón. Combina la tranquilidad del campo con la cercanía a la ciudad.",
+    image: "/asturian-countryside-apartment.png",
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 3,
+  },
+  {
+    id: 6,
+    title: "Villa con piscina en Villaviciosa",
+    location: "Villaviciosa, Asturias",
+    price: 150,
+    description:
+      "Espectacular villa con piscina privada en Villaviciosa. Ideal para grupos grandes y celebraciones familiares.",
+    image: "/asturian-villa-retreat.png",
+    bedrooms: 4,
+    bathrooms: 3,
+    capacity: 8,
+  },
+]
 
 export default async function PropiedadesPage() {
-  const properties = await getProperties()
+  // Obtener propiedades directamente en el componente
+  let properties = []
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+
+    if (!error) {
+      properties = data
+    }
+  } catch (error) {
+    console.error("Error fetching properties:", error)
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -90,81 +161,7 @@ export default async function PropiedadesPage() {
                 </CardContent>
               </Card>
             ))
-          : // Propiedades de ejemplo si no hay datos en Supabase
-            [
-              {
-                id: 1,
-                title: "Casa rural en Covadonga",
-                location: "Covadonga, Asturias",
-                price: 120,
-                description:
-                  "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga. Ideal para familias y amantes de la naturaleza.",
-                image: "/asturian-countryside-home.png",
-                bedrooms: 3,
-                bathrooms: 2,
-                capacity: 6,
-              },
-              {
-                id: 2,
-                title: "Apartamento en Llanes",
-                location: "Llanes, Asturias",
-                price: 85,
-                description:
-                  "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias. Perfecto para parejas.",
-                image: "/llanes-apartment-balcony-view.png",
-                bedrooms: 1,
-                bathrooms: 1,
-                capacity: 4,
-              },
-              {
-                id: 3,
-                title: "Cabaña en Cangas de Onís",
-                location: "Cangas de Onís, Asturias",
-                price: 95,
-                description:
-                  "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís. Disfruta de la tranquilidad y la naturaleza.",
-                image: "/asturian-cabin-retreat.png",
-                bedrooms: 2,
-                bathrooms: 1,
-                capacity: 5,
-              },
-              {
-                id: 4,
-                title: "Casa de piedra en Ribadesella",
-                location: "Ribadesella, Asturias",
-                price: 110,
-                description:
-                  "Tradicional casa de piedra completamente restaurada en Ribadesella. A 10 minutos de la playa y con vistas al mar Cantábrico.",
-                image: "/ribadesella-stone-house.png",
-                bedrooms: 3,
-                bathrooms: 2,
-                capacity: 6,
-              },
-              {
-                id: 5,
-                title: "Apartamento rural en Gijón",
-                location: "Gijón, Asturias",
-                price: 75,
-                description:
-                  "Acogedor apartamento rural en las afueras de Gijón. Combina la tranquilidad del campo con la cercanía a la ciudad.",
-                image: "/asturian-countryside-apartment.png",
-                bedrooms: 1,
-                bathrooms: 1,
-                capacity: 3,
-              },
-              {
-                id: 6,
-                title: "Villa con piscina en Villaviciosa",
-                location: "Villaviciosa, Asturias",
-                price: 150,
-                description:
-                  "Espectacular villa con piscina privada en Villaviciosa. Ideal para grupos grandes y celebraciones familiares.",
-                image: "/asturian-villa-retreat.png",
-                bedrooms: 4,
-                bathrooms: 3,
-                capacity: 8,
-              },
-            ].map((property) => (
+          : exampleProperties.map((property) => (
               <Card key={property.id} className="overflow-hidden group">
                 <div className="relative h-48 overflow-hidden">
                   <Image

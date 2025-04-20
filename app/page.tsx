@@ -9,68 +9,63 @@ import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
 import { PropertyCard } from "@/components/property-card"
 import { NavAuthButtons } from "@/components/nav-auth-buttons"
+import { createServerClient } from "@/lib/supabase"
 
-// Marcamos la función como asíncrona y la separamos para evitar pasarla directamente al componente
-async function getFeaturedProperties() {
-  "use server"
-
-  const { createServerClient } = await import("@/lib/supabase")
-  const supabase = createServerClient()
-
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-    .limit(3)
-
-  if (error) {
-    console.error("Error fetching properties:", error)
-    return []
-  }
-
-  return data || []
-}
+// Propiedades de ejemplo para usar si no hay datos en Supabase
+const exampleProperties = [
+  {
+    id: 1,
+    title: "Casa rural en Covadonga",
+    location: "Covadonga, Asturias",
+    price: 120,
+    description: "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga.",
+    image: "/asturian-countryside-home.png",
+    bedrooms: 3,
+    bathrooms: 2,
+    capacity: 6,
+  },
+  {
+    id: 2,
+    title: "Apartamento en Llanes",
+    location: "Llanes, Asturias",
+    price: 85,
+    description: "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias.",
+    image: "/llanes-apartment-balcony-view.png",
+    bedrooms: 1,
+    bathrooms: 1,
+    capacity: 4,
+  },
+  {
+    id: 3,
+    title: "Cabaña en Cangas de Onís",
+    location: "Cangas de Onís, Asturias",
+    price: 95,
+    description: "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís.",
+    image: "/asturian-cabin-retreat.png",
+    bedrooms: 2,
+    bathrooms: 1,
+    capacity: 5,
+  },
+]
 
 export default async function Home() {
-  const featuredProperties = await getFeaturedProperties()
+  // Obtener propiedades destacadas directamente en el componente
+  let featuredProperties = []
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(3)
 
-  // Propiedades de ejemplo para usar si no hay datos en Supabase
-  const exampleProperties = [
-    {
-      id: 1,
-      title: "Casa rural en Covadonga",
-      location: "Covadonga, Asturias",
-      price: 120,
-      description: "Encantadora casa rural con vistas a los Picos de Europa, cerca del Santuario de Covadonga.",
-      image: "/asturian-countryside-home.png",
-      bedrooms: 3,
-      bathrooms: 2,
-      capacity: 6,
-    },
-    {
-      id: 2,
-      title: "Apartamento en Llanes",
-      location: "Llanes, Asturias",
-      price: 85,
-      description: "Moderno apartamento en el centro de Llanes, a pocos minutos de las playas más bonitas de Asturias.",
-      image: "/llanes-apartment-balcony-view.png",
-      bedrooms: 1,
-      bathrooms: 1,
-      capacity: 4,
-    },
-    {
-      id: 3,
-      title: "Cabaña en Cangas de Onís",
-      location: "Cangas de Onís, Asturias",
-      price: 95,
-      description: "Hermosa cabaña de madera situada en un entorno natural privilegiado cerca de Cangas de Onís.",
-      image: "/asturian-cabin-retreat.png",
-      bedrooms: 2,
-      bathrooms: 1,
-      capacity: 5,
-    },
-  ]
+    if (!error) {
+      featuredProperties = data
+    }
+  } catch (error) {
+    console.error("Error fetching properties:", error)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">

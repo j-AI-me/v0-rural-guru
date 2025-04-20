@@ -11,21 +11,26 @@ export function NavAuthButtons() {
 
   useEffect(() => {
     const fetchSession = async () => {
-      const supabase = getSupabaseBrowserClient()
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      setSession(session)
-      setLoading(false)
-
-      // Suscribirse a cambios en la autenticación
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
+      try {
+        const supabase = getSupabaseBrowserClient()
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
         setSession(session)
-      })
 
-      return () => subscription.unsubscribe()
+        // Suscribirse a cambios en la autenticación
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+          setSession(session)
+        })
+
+        return () => subscription.unsubscribe()
+      } catch (error) {
+        console.error("Error fetching session:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchSession()
