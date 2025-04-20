@@ -12,10 +12,14 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" className="text-sm">
-              Iniciar sesión
-            </Button>
-            <Button className="text-sm bg-black hover:bg-gray-800">Registrarse</Button>
+            <Link href="/auth/login">
+              <Button variant="ghost" className="text-sm">
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link href="/auth/registro">
+              <Button className="text-sm bg-black hover:bg-gray-800">Registrarse</Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -25,8 +29,12 @@ export default function Home() {
           <h1 className="text-4xl font-bold mb-4">Bienvenido a RuralGuru</h1>
           <p className="text-xl mb-8">Tu plataforma para encontrar alojamientos rurales en Asturias</p>
           <div className="flex gap-4 justify-center">
-            <Button className="bg-black hover:bg-gray-800">Ver propiedades</Button>
-            <Button variant="outline">Ir al dashboard</Button>
+            <Link href="/propiedades">
+              <Button className="bg-black hover:bg-gray-800">Ver propiedades</Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button variant="outline">Ir al dashboard</Button>
+            </Link>
           </div>
         </div>
       </main>

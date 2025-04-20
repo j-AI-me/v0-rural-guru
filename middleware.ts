@@ -1,21 +1,9 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-
-  try {
-    // Crear cliente de Supabase para el middleware
-    const supabase = createMiddlewareClient({ req, res })
-
-    // Refrescar la sesión si existe
-    await supabase.auth.getSession()
-  } catch (error) {
-    console.error("Error en middleware:", error)
-  }
-
-  return res
+  // Simplemente devolver la respuesta sin intentar crear el cliente de Supabase
+  return NextResponse.next()
 }
 
 // Configurar las rutas que deben usar el middleware
@@ -26,7 +14,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public (public files)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public).*)",
   ],
 }
