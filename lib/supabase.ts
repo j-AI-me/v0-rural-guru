@@ -1,29 +1,33 @@
 import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
 
-// Función para obtener el cliente Supabase en el servidor
-export function getSupabaseServerClient() {
-  try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+// Creamos un cliente de Supabase para el lado del cliente
+export const createBrowserClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-    // Crear un nuevo cliente para cada solicitud
-    const cookieStore = cookies()
-    return createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-      },
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-      },
-    })
-  } catch (error) {
-    console.error("Error initializing Supabase server client:", error)
-    throw error
-  }
+  return createClient(supabaseUrl, supabaseAnonKey)
 }
 
-// Alias para mantener compatibilidad con el código existente
-export const getServerSupabase = getSupabaseServerClient
+// Singleton para el cliente del navegador
+let browserClient: ReturnType<typeof createBrowserClient> | null = null
+
+// Función para obtener el cliente de Supabase en el navegador
+export const getSupabaseBrowserClient = () => {
+  if (!browserClient) {
+    browserClient = createBrowserClient()
+  }
+  return browserClient
+}
+
+// Función para crear un cliente de Supabase en el servidor
+export const createServerClient = () => {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+}
