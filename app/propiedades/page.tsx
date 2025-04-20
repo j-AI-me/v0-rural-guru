@@ -1,9 +1,4 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion } from "../config"
-
-// Exportar la configuración
-export { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion }
 
 export default function PropiedadesPage() {
   return (
@@ -11,9 +6,9 @@ export default function PropiedadesPage() {
       <h1 className="text-3xl font-bold mb-8">Propiedades en Asturias</h1>
 
       <div className="text-center py-12">
-        <p className="text-xl mb-4">Estamos cargando las propiedades...</p>
-        <Link href="/">
-          <Button className="bg-black hover:bg-gray-800">Volver al inicio</Button>
+        <p className="text-xl mb-4">Estamos trabajando en esta sección. Vuelve pronto.</p>
+        <Link href="/" className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800">
+          Volver al inicio
         </Link>
       </div>
     </div>

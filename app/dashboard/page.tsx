@@ -1,27 +1,20 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { requireAuth } from "@/lib/auth"
-import { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion } from "../config"
+import Link from "next/link"
 
-// Exportar la configuración
-export { dynamic, dynamicParams, revalidate, fetchCache, runtime, preferredRegion }
-
-export default async function DashboardPage() {
-  // Verificar que el usuario esté autenticado
-  try {
-    await requireAuth()
-  } catch (error) {
-    console.error("Error de autenticación:", error)
-  }
-
+export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
-      <Card>
-        <CardContent className="p-6">
-          <p>Bienvenido al dashboard de RuralGuru.</p>
-        </CardContent>
-      </Card>
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <p className="mb-4">Bienvenido al dashboard de RuralGuru.</p>
+        <p>Estamos trabajando en esta sección. Vuelve pronto.</p>
+      </div>
+
+      <div className="mt-6">
+        <Link href="/" className="text-blue-600 hover:underline">
+          ← Volver al inicio
+        </Link>
+      </div>
     </div>
   )
 }
