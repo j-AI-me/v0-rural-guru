@@ -3,19 +3,23 @@ const nextConfig = {
   // Configuración básica
   reactStrictMode: true,
   
-  // Desactivar completamente la optimización de imágenes
+  // Configuración de imágenes que permite usar imágenes externas
+  // pero evita problemas con sharp
   images: {
-    unoptimized: true,
-    domains: ['*'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
+    // Usar un formato de imagen más compatible
+    formats: ['image/webp'],
+    // Desactivar temporalmente la optimización para evitar problemas con sharp
+    unoptimized: true,
   },
   
-  // Ignorar todos los errores durante la compilación
+  // Ignorar errores de ESLint y TypeScript durante la compilación
+  // pero mantener la funcionalidad
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -23,57 +27,24 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Desactivar la minificación para depurar mejor
-  swcMinify: false,
-  
-  // Configuración avanzada de webpack
-  webpack: (config, { isServer }) => {
-    // Evitar problemas con módulos específicos
+  // Configuración mínima de webpack para resolver problemas específicos
+  webpack: (config) => {
+    // Resolver problemas con módulos específicos
     config.resolve.fallback = { 
       ...config.resolve.fallback,
       fs: false,
-      path: false,
-      os: false,
       net: false,
       tls: false,
-      crypto: false,
-      stream: false,
-      http: false,
-      https: false,
-      zlib: false,
     };
-    
-    // Ignorar advertencias específicas
-    config.ignoreWarnings = [
-      { module: /node_modules/ },
-    ];
-    
-    // Reducir el tamaño del paquete
-    if (!isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxInitialRequests: Infinity,
-        minSize: 0,
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-              return `npm.${packageName.replace('@', '')}`;
-            },
-          },
-        },
-      };
-    }
     
     return config;
   },
   
-  // Configuración de salida
-  output: 'standalone',
-  
-  // Desactivar la generación de fuentes de mapas
-  productionBrowserSourceMaps: false,
+  // Configuración experimental para mejorar la compatibilidad
+  experimental: {
+    // Desactivar temporalmente la optimización de imágenes con sharp
+    disableExperimentalFeaturesWarning: true,
+  }
 }
 
 export default nextConfig
