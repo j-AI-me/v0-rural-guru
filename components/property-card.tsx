@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPinIcon } from "lucide-react"
@@ -11,6 +12,7 @@ interface PropertyCardProps {
     price: number
     description: string
     image?: string
+    images?: Array<{ src: string; alt: string }>
     bedrooms: number
     bathrooms: number
     capacity: number
@@ -18,11 +20,17 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  // Determinar la imagen a mostrar
+  const imageSrc =
+    property.images?.[0]?.src ||
+    property.image ||
+    `/placeholder.svg?height=400&width=600&query=rural+house+in+${encodeURIComponent(property.location)}`
+
   return (
     <Card className="overflow-hidden group h-full">
       <div className="relative h-48 overflow-hidden">
         <Image
-          src={property.image || "/placeholder.svg"}
+          src={imageSrc || "/placeholder.svg"}
           alt={property.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -51,9 +59,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
               <span>{property.capacity} huésp.</span>
             </div>
           </div>
-          <Button variant="outline" className="w-full bg-black text-white hover:bg-gray-800">
-            Ver detalles
-          </Button>
+          <Link href={`/propiedades/${property.id}`} className="block w-full">
+            <Button variant="outline" className="w-full bg-black text-white hover:bg-gray-800">
+              Ver detalles
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

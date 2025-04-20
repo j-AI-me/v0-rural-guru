@@ -1,8 +1,6 @@
 import { LoginForm } from "@/components/auth/login-form"
 import { requireGuest } from "@/lib/auth"
 
-export const dynamic = "force-dynamic"
-
 export default async function LoginPage() {
   // Redirigir si el usuario ya está autenticado
   await requireGuest()

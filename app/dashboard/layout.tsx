@@ -3,8 +3,6 @@ import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { requireAuth } from "@/lib/auth"
 
-export const dynamic = "force-dynamic"
-
 export default async function DashboardLayout({
   children,
 }: {

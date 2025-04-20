@@ -2,18 +2,12 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { useAuth } from "@/components/auth/auth-provider"
 
 export function NavAuthButtons() {
-  // Usamos un estado simple para manejar la hidratación
-  const [mounted, setMounted] = useState(false)
+  const { user, isLoading } = useAuth()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Mientras no esté montado, mostramos un esqueleto
-  if (!mounted) {
+  if (isLoading) {
     return (
       <div className="flex items-center gap-4">
         <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>
@@ -22,7 +16,21 @@ export function NavAuthButtons() {
     )
   }
 
-  // Una vez montado, mostramos los botones reales
+  if (user) {
+    return (
+      <div className="flex items-center gap-4">
+        <Link href="/dashboard">
+          <Button variant="ghost" className="text-sm">
+            Dashboard
+          </Button>
+        </Link>
+        <Link href="/auth/logout">
+          <Button className="text-sm bg-black hover:bg-gray-800">Cerrar sesión</Button>
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className="flex items-center gap-4">
       <Link href="/auth/login">
