@@ -1,14 +1,10 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-import { Providers } from "./providers"
-
-const inter = Inter({ subsets: ["latin"] })
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "RuralGuru - Alojamientos rurales en Asturias",
-  description: "Encuentra el alojamiento rural perfecto para tus vacaciones en Asturias",
+  title: "RuralGuru",
+  description: "Alojamientos rurales en Asturias",
     generator: 'v0.dev'
 }
 
@@ -19,9 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
