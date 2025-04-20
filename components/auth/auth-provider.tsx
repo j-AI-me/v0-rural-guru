@@ -24,9 +24,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
 
+  // Inicializar Supabase solo en el lado del cliente
   useEffect(() => {
-    const supabase = createBrowserClient()
+    setSupabase(createBrowserClient())
+  }, [])
+
+  // Verificar si hay una sesión activa y suscribirse a cambios en la autenticación
+  useEffect(() => {
+    if (!supabase) return
 
     // Verificar si hay una sesión activa
     const checkSession = async () => {
@@ -41,6 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    checkSession()
+
     // Suscribirse a cambios en la autenticación
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -48,12 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false)
     })
 
-    checkSession()
-
     return () => {
       authListener?.subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   return <AuthContext.Provider value={{ user, session, isLoading }}>{children}</AuthContext.Provider>
 }

@@ -1,19 +1,25 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createBrowserClient } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 
 export default function LogoutPage() {
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   useEffect(() => {
     const logout = async () => {
-      const supabase = createBrowserClient()
-      await supabase.auth.signOut()
-      router.push("/")
-      router.refresh()
+      setIsLoggingOut(true)
+      try {
+        const supabase = createBrowserClient()
+        await supabase.auth.signOut()
+        router.push("/")
+        router.refresh()
+      } catch (error) {
+        console.error("Error during logout:", error)
+      }
     }
 
     logout()

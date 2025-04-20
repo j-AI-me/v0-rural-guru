@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -19,15 +19,21 @@ export function LoginForm() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
+
+  // Inicializar Supabase solo en el lado del cliente
+  useEffect(() => {
+    setSupabase(createBrowserClient())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) return
+
     setError(null)
     setIsLoading(true)
 
     try {
-      const supabase = createBrowserClient()
-
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -91,7 +97,7 @@ export function LoginForm() {
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full bg-black hover:bg-gray-800" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-black hover:bg-gray-800" disabled={isLoading || !supabase}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
