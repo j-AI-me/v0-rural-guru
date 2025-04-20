@@ -2,31 +2,22 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@/components/auth/auth-provider"
+import { useEffect, useState } from "react"
 
 export function NavAuthButtons() {
-  const { user, isLoading } = useAuth()
+  const [isClient, setIsClient] = useState(false)
 
-  if (isLoading) {
+  // Usar useEffect para evitar problemas de hidratación
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // No renderizar nada durante la hidratación para evitar errores
+  if (!isClient) {
     return (
       <div className="flex items-center gap-4">
-        <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>
-        <div className="h-9 w-24 bg-gray-800 animate-pulse rounded-md"></div>
-      </div>
-    )
-  }
-
-  if (user) {
-    return (
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard">
-          <Button variant="ghost" className="text-sm">
-            Dashboard
-          </Button>
-        </Link>
-        <Link href="/auth/logout">
-          <Button className="text-sm bg-black hover:bg-gray-800">Cerrar sesión</Button>
-        </Link>
+        <div className="h-9 w-20 bg-gray-200 rounded-md"></div>
+        <div className="h-9 w-24 bg-gray-800 rounded-md"></div>
       </div>
     )
   }
