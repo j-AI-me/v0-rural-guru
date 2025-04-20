@@ -1,7 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Building2, CalendarDays, DollarSign, TrendingUp, Users } from "lucide-react"
+import { requireAuth } from "@/lib/auth"
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // Verificar que el usuario esté autenticado
+  await requireAuth()
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>

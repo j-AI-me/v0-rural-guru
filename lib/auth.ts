@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerClientWithCookies } from "@/lib/supabase"
+import { createServerClientWithCookies } from "@/lib/supabase-server"
 import { redirect } from "next/navigation"
 import type { Session } from "@supabase/supabase-js"
 
