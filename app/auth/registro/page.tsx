@@ -1,6 +1,8 @@
 import { RegisterForm } from "@/components/auth/register-form"
 import { requireGuest } from "@/lib/auth"
 
+export const dynamic = "force-dynamic"
+
 export default async function RegisterPage() {
   // Redirigir si el usuario ya está autenticado
   await requireGuest()

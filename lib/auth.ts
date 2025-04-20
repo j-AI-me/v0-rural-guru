@@ -6,12 +6,17 @@ import type { Session } from "@supabase/supabase-js"
 
 // Obtener la sesión del usuario actual desde el servidor
 export async function getSession(): Promise<Session | null> {
-  const supabase = createServerClientWithCookies()
+  try {
+    const supabase = createServerClientWithCookies()
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  return session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    return session
+  } catch (error) {
+    console.error("Error en getSession:", error)
+    return null
+  }
 }
 
 // Verificar si el usuario está autenticado y redirigir si es necesario
@@ -33,25 +38,35 @@ export async function requireAuth(redirectTo = "/auth/login") {
 
 // Verificar si el usuario ya está autenticado y redirigir si es necesario
 export async function requireGuest(redirectTo = "/dashboard") {
-  const session = await getSession()
+  try {
+    const session = await getSession()
 
-  if (session) {
-    redirect(redirectTo)
+    if (session) {
+      redirect(redirectTo)
+    }
+
+    return null
+  } catch (error) {
+    console.error("Error en requireGuest:", error)
+    return null
   }
-
-  return null
 }
 
 // Obtener el perfil del usuario actual
 export async function getCurrentUserProfile() {
-  const session = await getSession()
+  try {
+    const session = await getSession()
 
-  if (!session) {
+    if (!session) {
+      return null
+    }
+
+    const supabase = createServerClientWithCookies()
+    const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
+
+    return data
+  } catch (error) {
+    console.error("Error en getCurrentUserProfile:", error)
     return null
   }
-
-  const supabase = createServerClientWithCookies()
-  const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single()
-
-  return data
 }
