@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -48,9 +50,8 @@ const exampleProperties = [
   },
 ]
 
-export default async function Home() {
-  // Obtener propiedades destacadas directamente en el componente
-  let featuredProperties = []
+// Función para obtener propiedades destacadas
+async function getFeaturedProperties() {
   try {
     const supabase = createServerClient()
     const { data, error } = await supabase
@@ -60,12 +61,21 @@ export default async function Home() {
       .order("created_at", { ascending: false })
       .limit(3)
 
-    if (!error) {
-      featuredProperties = data
+    if (error) {
+      console.error("Error fetching properties:", error)
+      return []
     }
+
+    return data || []
   } catch (error) {
     console.error("Error fetching properties:", error)
+    return []
   }
+}
+
+export default async function Home() {
+  // Obtener propiedades destacadas
+  const featuredProperties = await getFeaturedProperties()
 
   return (
     <div className="flex flex-col min-h-screen">

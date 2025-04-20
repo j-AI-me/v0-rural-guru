@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { MapPinIcon, Search, Filter } from "lucide-react"
 import { createServerClient } from "@/lib/supabase"
 
+export const dynamic = "force-dynamic"
+
 // Propiedades de ejemplo para usar si no hay datos en Supabase
 const exampleProperties = [
   {
