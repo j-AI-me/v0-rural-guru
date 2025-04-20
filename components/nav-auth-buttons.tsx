@@ -3,32 +3,38 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import { getSupabaseBrowserClient } from "@/lib/supabase"
 
 export function NavAuthButtons() {
   const [session, setSession] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Importar el cliente de Supabase dinámicamente para evitar problemas de SSR
     const fetchSession = async () => {
       try {
-        const supabase = getSupabaseBrowserClient()
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setSession(session)
+        // Importación dinámica para evitar problemas de SSR
+        const { createClient } = await import("@supabase/supabase-js")
+
+        // Crear cliente directamente aquí en lugar de importar una función
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+        const { data } = await supabase.auth.getSession()
+        setSession(data.session)
 
         // Suscribirse a cambios en la autenticación
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
           setSession(session)
         })
 
-        return () => subscription.unsubscribe()
+        setLoading(false)
+
+        return () => {
+          authListener?.subscription.unsubscribe()
+        }
       } catch (error) {
         console.error("Error fetching session:", error)
-      } finally {
         setLoading(false)
       }
     }

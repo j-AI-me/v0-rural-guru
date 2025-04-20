@@ -6,7 +6,7 @@ import { PropertyGallery } from "@/components/property-gallery"
 import { BookingSystem } from "@/components/booking-system"
 import { Bath, Bed, Coffee, Home, Info, MapPin, MessageSquare, Star, Users, Wifi, Wind } from "lucide-react"
 import { notFound } from "next/navigation"
-import { getProperty } from "./actions"
+import { createServerClient } from "@/lib/supabase"
 
 // Datos de ejemplo para las reseñas (en una implementación real, vendrían de la base de datos)
 const sampleReviews = [
@@ -40,8 +40,18 @@ const sampleReviews = [
 ]
 
 export default async function PropertyPage({ params }: { params: { id: string } }) {
-  // Obtener la propiedad usando la función marcada con 'use server'
-  const property = await getProperty(params.id)
+  // Obtener la propiedad de la base de datos
+  let property = null
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase.from("properties").select("*").eq("id", params.id).single()
+
+    if (!error && data) {
+      property = data
+    }
+  } catch (error) {
+    console.error("Error fetching property:", error)
+  }
 
   if (!property) {
     notFound()

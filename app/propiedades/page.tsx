@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { MapPinIcon, Search, Filter } from "lucide-react"
-import { getProperties } from "./actions"
+import { createServerClient } from "@/lib/supabase"
 
 // Propiedades de ejemplo para usar si no hay datos en Supabase
 const exampleProperties = [
@@ -83,8 +83,22 @@ const exampleProperties = [
 ]
 
 export default async function PropiedadesPage() {
-  // Obtener propiedades usando la función marcada con 'use server'
-  const properties = await getProperties()
+  // Obtener propiedades directamente en el componente
+  let properties = []
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+
+    if (!error) {
+      properties = data
+    }
+  } catch (error) {
+    console.error("Error fetching properties:", error)
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

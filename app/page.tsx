@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { es } from "date-fns/locale"
 import { PropertyCard } from "@/components/property-card"
 import { NavAuthButtons } from "@/components/nav-auth-buttons"
-import { getFeaturedProperties } from "./actions"
+import { createServerClient } from "@/lib/supabase"
 
 // Propiedades de ejemplo para usar si no hay datos en Supabase
 const exampleProperties = [
@@ -49,8 +49,23 @@ const exampleProperties = [
 ]
 
 export default async function Home() {
-  // Obtener propiedades destacadas usando la función marcada con 'use server'
-  const featuredProperties = await getFeaturedProperties()
+  // Obtener propiedades destacadas directamente en el componente
+  let featuredProperties = []
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(3)
+
+    if (!error) {
+      featuredProperties = data
+    }
+  } catch (error) {
+    console.error("Error fetching properties:", error)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
