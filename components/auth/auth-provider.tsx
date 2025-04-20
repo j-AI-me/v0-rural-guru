@@ -10,14 +10,12 @@ type AuthContextType = {
   user: User | null
   session: Session | null
   isLoading: boolean
-  error: Error | null
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   isLoading: true,
-  error: null,
 })
 
 export const useAuth = () => useContext(AuthContext)
@@ -26,18 +24,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
   const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
+
+  // Renderizar los children independientemente del estado de carga
+  // para evitar problemas de hidratación
 
   // Inicializar Supabase solo en el lado del cliente
   useEffect(() => {
-    try {
-      setSupabase(createBrowserClient())
-    } catch (err) {
-      console.error("Error al crear el cliente de Supabase:", err)
-      setError(err instanceof Error ? err : new Error(String(err)))
-      setIsLoading(false)
-    }
+    setSupabase(createBrowserClient())
   }, [])
 
   // Verificar si hay una sesión activa y suscribirse a cambios en la autenticación
@@ -47,17 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Verificar si hay una sesión activa
     const checkSession = async () => {
       try {
-        const { data, error: sessionError } = await supabase.auth.getSession()
-
-        if (sessionError) {
-          throw sessionError
-        }
-
+        const { data } = await supabase.auth.getSession()
         setSession(data.session)
         setUser(data.session?.user || null)
-      } catch (err) {
-        console.error("Error checking session:", err)
-        setError(err instanceof Error ? err : new Error(String(err)))
+      } catch (error) {
+        console.error("Error checking session:", error)
       } finally {
         setIsLoading(false)
       }
@@ -77,5 +65,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase])
 
-  return <AuthContext.Provider value={{ user, session, isLoading, error }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, session, isLoading }}>{children}</AuthContext.Provider>
 }

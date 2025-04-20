@@ -1,20 +1,33 @@
 import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/components/auth/auth-provider"
+import SupabaseProvider from "./supabase-provider"
 
-export const metadata = {
-  title: "RuralGuru",
-  description: "Alojamientos rurales en Asturias",
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "RuralGuru - Alojamientos rurales en Asturias",
+  description: "Encuentra el alojamiento rural perfecto para tus vacaciones en Asturias",
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <SupabaseProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </SupabaseProvider>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
