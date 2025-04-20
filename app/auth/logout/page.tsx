@@ -15,10 +15,17 @@ export default function LogoutPage() {
       try {
         const supabase = createBrowserClient()
         await supabase.auth.signOut()
+
+        // Asegurarse de que la redirección funcione correctamente
         router.push("/")
         router.refresh()
       } catch (error) {
         console.error("Error during logout:", error)
+        // Incluso si hay un error, intentar redirigir al usuario
+        setTimeout(() => {
+          router.push("/")
+          router.refresh()
+        }, 1000)
       }
     }
 

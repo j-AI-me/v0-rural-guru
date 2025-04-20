@@ -1,8 +1,11 @@
 import { Resend } from "resend"
 
 // Inicializar Resend con la API key
-// En producción, esto vendría de las variables de entorno
-const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789")
+if (!process.env.RESEND_API_KEY) {
+  console.warn("ADVERTENCIA: RESEND_API_KEY no está definida. Los emails no se enviarán correctamente.")
+}
+
+const resend = new Resend(process.env.RESEND_API_KEY || "")
 
 // Tipos para las plantillas de email
 type BookingEmailProps = {
@@ -13,6 +16,7 @@ type BookingEmailProps = {
   guests: number
   totalPrice: number
   bookingId: string
+  guestEmail?: string // Add guestEmail as optional
 }
 
 type HostEmailProps = {
@@ -35,39 +39,40 @@ export async function sendBookingConfirmationEmail({
   guests,
   totalPrice,
   bookingId,
+  guestEmail,
 }: BookingEmailProps) {
   try {
     const { data, error } = await resend.emails.send({
       from: "RuralGuru <reservas@ruralguru.com>",
-      to: ["guest@example.com"], // En producción, esto sería el email real del huésped
+      to: [guestEmail || "guest@example.com"], // Usar el email real del huésped si está disponible
       subject: `Confirmación de reserva - ${propertyName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #000; padding: 20px; text-align: center;">
-            <h1 style="color: white; margin: 0;">RuralGuru</h1>
-          </div>
-          <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
-            <h2>¡Gracias por tu reserva, ${guestName}!</h2>
-            <p>Tu reserva en <strong>${propertyName}</strong> ha sido confirmada.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="margin-top: 0;">Detalles de la reserva:</h3>
-              <p><strong>Número de reserva:</strong> ${bookingId}</p>
-              <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
-              <p><strong>Fecha de salida:</strong> ${checkOut}</p>
-              <p><strong>Número de huéspedes:</strong> ${guests}</p>
-              <p><strong>Precio total:</strong> ${totalPrice}€</p>
-            </div>
-            
-            <p>Si tienes alguna pregunta sobre tu reserva, no dudes en contactarnos.</p>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
-              <p>Este email ha sido enviado por RuralGuru.</p>
-              <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
-            </div>
-          </div>
-        </div>
-      `,
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #000; padding: 20px; text-align: center;">
+      <h1 style="color: white; margin: 0;">RuralGuru</h1>
+    </div>
+    <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
+      <h2>¡Gracias por tu reserva, ${guestName}!</h2>
+      <p>Tu reserva en <strong>${propertyName}</strong> ha sido confirmada.</p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Detalles de la reserva:</h3>
+        <p><strong>Número de reserva:</strong> ${bookingId}</p>
+        <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
+        <p><strong>Fecha de salida:</strong> ${checkOut}</p>
+        <p><strong>Número de huéspedes:</strong> ${guests}</p>
+        <p><strong>Precio total:</strong> ${totalPrice}€</p>
+      </div>
+      
+      <p>Si tienes alguna pregunta sobre tu reserva, no dudes en contactarnos.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
+        <p>Este email ha sido enviado por RuralGuru.</p>
+        <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </div>
+`,
     })
 
     if (error) {
@@ -99,32 +104,32 @@ export async function sendHostNotificationEmail({
       to: ["host@example.com"], // En producción, esto sería el email real del anfitrión
       subject: `Nueva reserva - ${propertyName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #000; padding: 20px; text-align: center;">
-            <h1 style="color: white; margin: 0;">RuralGuru</h1>
-          </div>
-          <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
-            <h2>¡Has recibido una nueva reserva, ${hostName}!</h2>
-            <p><strong>${guestName}</strong> ha reservado tu propiedad <strong>${propertyName}</strong>.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="margin-top: 0;">Detalles de la reserva:</h3>
-              <p><strong>Número de reserva:</strong> ${bookingId}</p>
-              <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
-              <p><strong>Fecha de salida:</strong> ${checkOut}</p>
-              <p><strong>Número de huéspedes:</strong> ${guests}</p>
-              <p><strong>Precio total:</strong> ${totalPrice}€</p>
-            </div>
-            
-            <p>Puedes gestionar esta reserva desde tu panel de control.</p>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
-              <p>Este email ha sido enviado por RuralGuru.</p>
-              <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
-            </div>
-          </div>
-        </div>
-      `,
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #000; padding: 20px; text-align: center;">
+      <h1 style="color: white; margin: 0;">RuralGuru</h1>
+    </div>
+    <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
+      <h2>¡Has recibido una nueva reserva, ${hostName}!</h2>
+      <p><strong>${guestName}</strong> ha reservado tu propiedad <strong>${propertyName}</strong>.</p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Detalles de la reserva:</h3>
+        <p><strong>Número de reserva:</strong> ${bookingId}</p>
+        <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
+        <p><strong>Fecha de salida:</strong> ${checkOut}</p>
+        <p><strong>Número de huéspedes:</strong> ${guests}</p>
+        <p><strong>Precio total:</strong> ${totalPrice}€</p>
+      </div>
+      
+      <p>Puedes gestionar esta reserva desde tu panel de control.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
+        <p>Este email ha sido enviado por RuralGuru.</p>
+        <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </div>
+`,
     })
 
     if (error) {
@@ -146,38 +151,38 @@ export async function sendBookingCancellationEmail({
   checkIn,
   checkOut,
   bookingId,
-}: Omit<BookingEmailProps, "guests" | "totalPrice">) {
+}: Omit<BookingEmailProps, "guests" | "totalPrice" | "guestEmail">) {
   try {
     const { data, error } = await resend.emails.send({
       from: "RuralGuru <reservas@ruralguru.com>",
       to: ["guest@example.com"], // En producción, esto sería el email real del huésped
       subject: `Cancelación de reserva - ${propertyName}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #000; padding: 20px; text-align: center;">
-            <h1 style="color: white; margin: 0;">RuralGuru</h1>
-          </div>
-          <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
-            <h2>Reserva cancelada</h2>
-            <p>Hola ${guestName},</p>
-            <p>Tu reserva en <strong>${propertyName}</strong> ha sido cancelada.</p>
-            
-            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="margin-top: 0;">Detalles de la reserva cancelada:</h3>
-              <p><strong>Número de reserva:</strong> ${bookingId}</p>
-              <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
-              <p><strong>Fecha de salida:</strong> ${checkOut}</p>
-            </div>
-            
-            <p>Si tienes alguna pregunta sobre esta cancelación, no dudes en contactarnos.</p>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
-              <p>Este email ha sido enviado por RuralGuru.</p>
-              <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
-            </div>
-          </div>
-        </div>
-      `,
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: #000; padding: 20px; text-align: center;">
+      <h1 style="color: white; margin: 0;">RuralGuru</h1>
+    </div>
+    <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
+      <h2>Reserva cancelada</h2>
+      <p>Hola ${guestName},</p>
+      <p>Tu reserva en <strong>${propertyName}</strong> ha sido cancelada.</p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h3 style="margin-top: 0;">Detalles de la reserva cancelada:</h3>
+        <p><strong>Número de reserva:</strong> ${bookingId}</p>
+        <p><strong>Fecha de entrada:</strong> ${checkIn}</p>
+        <p><strong>Fecha de salida:</strong> ${checkOut}</p>
+      </div>
+      
+      <p>Si tienes alguna pregunta sobre esta cancelación, no dudes en contactarnos.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center; color: #777; font-size: 12px;">
+        <p>Este email ha sido enviado por RuralGuru.</p>
+        <p>© ${new Date().getFullYear()} RuralGuru. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </div>
+`,
     })
 
     if (error) {

@@ -223,18 +223,26 @@ export function BookingSystem({ propertyId, propertyName, basePrice, maxGuests }
         setBookingId(data[0].id)
 
         // Enviar notificaciones por email
-        const response = await fetch("/api/notifications/new-booking", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            bookingId: data[0].id,
-          }),
-        })
+        try {
+          // Enviar notificaciones por email
+          const response = await fetch("/api/notifications/new-booking", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              bookingId: data[0].id,
+            }),
+          })
 
-        if (!response.ok) {
-          console.error("Error al enviar notificaciones:", await response.text())
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error("Error al enviar notificaciones:", errorText)
+            // No interrumpir el flujo principal, solo registrar el error
+          }
+        } catch (notificationError) {
+          console.error("Error al enviar notificaciones:", notificationError)
+          // No interrumpir el flujo principal, solo registrar el error
         }
       }
 

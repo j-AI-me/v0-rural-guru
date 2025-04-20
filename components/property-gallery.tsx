@@ -37,7 +37,8 @@ export function PropertyGallery({ images }: PropertyGalleryProps) {
               alt={images[0].alt}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              priority
             />
           </div>
           {images.slice(1, 5).map((image, index) => (
@@ -76,6 +77,7 @@ export function PropertyGallery({ images }: PropertyGalleryProps) {
                 size="icon"
                 className="absolute left-8 top-1/2 transform -translate-y-1/2 rounded-full"
                 onClick={handlePrevious}
+                aria-label="Imagen anterior"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -84,6 +86,7 @@ export function PropertyGallery({ images }: PropertyGalleryProps) {
                 size="icon"
                 className="absolute right-8 top-1/2 transform -translate-y-1/2 rounded-full"
                 onClick={handleNext}
+                aria-label="Imagen siguiente"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

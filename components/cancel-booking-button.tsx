@@ -37,18 +37,25 @@ export function CancelBookingButton({ bookingId }: CancelBookingButtonProps) {
       if (error) throw error
 
       // Enviar notificaciones de cancelación
-      const response = await fetch("/api/notifications/cancel-booking", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bookingId,
-        }),
-      })
+      try {
+        const response = await fetch("/api/notifications/cancel-booking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId,
+          }),
+        })
 
-      if (!response.ok) {
-        console.error("Error al enviar notificaciones de cancelación:", await response.text())
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error("Error al enviar notificaciones de cancelación:", errorText)
+          // No interrumpir el flujo principal, solo registrar el error
+        }
+      } catch (notificationError) {
+        console.error("Error al enviar notificaciones de cancelación:", notificationError)
+        // No interrumpir el flujo principal, solo registrar el error
       }
 
       // Cerrar el diálogo

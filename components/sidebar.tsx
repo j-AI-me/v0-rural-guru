@@ -49,26 +49,26 @@ export function Sidebar() {
     }
   }, [isOpen])
 
-  // Variantes para animaciones de Framer Motion
+  // Variantes para animaciones de Framer Motion (optimizadas)
   const sidebarVariants = {
     open: {
       x: 0,
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30,
+        stiffness: 250, // Reducido para mejor rendimiento
+        damping: 25, // Reducido para mejor rendimiento
         when: "beforeChildren",
-        staggerChildren: 0.05,
+        staggerChildren: 0.03, // Reducido para mejor rendimiento
       },
     },
     closed: {
       x: "-100%",
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30,
+        stiffness: 250, // Reducido para mejor rendimiento
+        damping: 25, // Reducido para mejor rendimiento
         when: "afterChildren",
-        staggerChildren: 0.05,
+        staggerChildren: 0.03, // Reducido para mejor rendimiento
         staggerDirection: -1,
       },
     },

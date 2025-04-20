@@ -15,10 +15,20 @@ export const createServerClient = () => {
 
 // Exportamos una función para el cliente que se usará en componentes cliente
 export const createBrowserClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  return createClient(supabaseUrl, supabaseAnonKey)
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error(
+      "Error: Variables de entorno de Supabase no definidas. Asegúrate de que NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY estén configuradas.",
+    )
+  }
+
+  return createClient(supabaseUrl || "", supabaseAnonKey || "")
 }
 
+/**
+ * IMPORTANTE: Esta función solo debe usarse en componentes cliente ('use client').
+ * No importar esta función en componentes de servidor o archivos que se usen en el servidor.
+ */
 export const getSupabaseBrowserClient = createBrowserClient

@@ -115,27 +115,35 @@ export function AvailabilityCalendar({ propertyId, initialPrice = 0 }: Availabil
 
       if (error) throw error
 
-      // Actualizar el estado local
+      // Actualizar el estado local de manera más eficiente
       setAvailabilityDays((prev) => {
+        // Crear un mapa para búsqueda más rápida
+        const dateMap = new Map()
+        prev.forEach((item, index) => {
+          const dateKey = format(item.date, "yyyy-MM-dd")
+          dateMap.set(dateKey, { item, index })
+        })
+
+        // Crear una copia del array
         const updated = [...prev]
 
+        // Procesar las fechas seleccionadas
         selectedDates.forEach((date) => {
-          const existingIndex = updated.findIndex((d) => isSameDay(d.date, date))
+          const dateKey = format(date, "yyyy-MM-dd")
+          const existingEntry = dateMap.get(dateKey)
 
-          if (existingIndex >= 0) {
+          const newItem = {
+            date,
+            isAvailable: selectionMode === "available",
+            price: selectionMode === "available" ? defaultPrice : null,
+          }
+
+          if (existingEntry) {
             // Actualizar existente
-            updated[existingIndex] = {
-              date,
-              isAvailable: selectionMode === "available",
-              price: selectionMode === "available" ? defaultPrice : null,
-            }
+            updated[existingEntry.index] = newItem
           } else {
             // Añadir nuevo
-            updated.push({
-              date,
-              isAvailable: selectionMode === "available",
-              price: selectionMode === "available" ? defaultPrice : null,
-            })
+            updated.push(newItem)
           }
         })
 

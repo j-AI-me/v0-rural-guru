@@ -16,13 +16,19 @@ export async function getSession(): Promise<Session | null> {
 
 // Verificar si el usuario está autenticado y redirigir si es necesario
 export async function requireAuth(redirectTo = "/auth/login") {
-  const session = await getSession()
+  try {
+    const session = await getSession()
 
-  if (!session) {
+    if (!session) {
+      redirect(redirectTo)
+    }
+
+    return session
+  } catch (error) {
+    console.error("Error en requireAuth:", error)
+    // Si hay un error, redirigir de todos modos para evitar problemas de seguridad
     redirect(redirectTo)
   }
-
-  return session
 }
 
 // Verificar si el usuario ya está autenticado y redirigir si es necesario

@@ -26,6 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
 
+  // Renderizar los children independientemente del estado de carga
+  // para evitar problemas de hidratación
+
   // Inicializar Supabase solo en el lado del cliente
   useEffect(() => {
     setSupabase(createBrowserClient())

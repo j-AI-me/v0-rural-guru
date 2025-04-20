@@ -6,11 +6,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-// Función para obtener una propiedad por ID
+// Función para obtener una propiedad por ID con verificación de propiedad
 async function getProperty(id: string) {
   const supabase = createServerClient()
 
-  const { data, error } = await supabase.from("properties").select("*").eq("id", id).single()
+  // Obtener la sesión del usuario
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  if (!session) {
+    return null
+  }
+
+  // Obtener la propiedad y verificar que pertenezca al usuario actual
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", session.user.id) // Verificar que la propiedad pertenezca al usuario
+    .single()
 
   if (error || !data) {
     return null
