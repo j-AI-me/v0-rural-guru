@@ -62,7 +62,11 @@
     "@supabase/supabase-js": "latest",
     "framer-motion": "latest",
     "resend": "latest",
-    "@supabase/auth-helpers-nextjs": "latest"
+    "@supabase/auth-helpers-nextjs": "latest",
+    "child_process": "latest",
+    "path": "latest",
+    "fs": "latest",
+    "@next/bundle-analyzer": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

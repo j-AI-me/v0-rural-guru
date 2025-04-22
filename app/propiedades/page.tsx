@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { MapPinIcon, Search, Filter } from "lucide-react"
 import { createServerClient } from "@/lib/supabase"
+import { cookies } from "next/headers"
 
 // Propiedades de ejemplo para usar si no hay datos en Supabase
 const exampleProperties = [
@@ -85,6 +86,9 @@ const exampleProperties = [
 export default async function PropiedadesPage() {
   // Obtener propiedades directamente en el componente
   let properties = []
+  const cookieStore = cookies()
+  const session = cookieStore.get("sb-session")
+
   try {
     const supabase = createServerClient()
     const { data, error } = await supabase
@@ -100,6 +104,8 @@ export default async function PropiedadesPage() {
     console.error("Error fetching properties:", error)
   }
 
+  const showAuthBanner = !session // Asume que tienes acceso a la sesión
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Propiedades en Asturias</h1>
@@ -114,6 +120,21 @@ export default async function PropiedadesPage() {
           Filtros
         </Button>
       </div>
+
+      {showAuthBanner && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-blue-800 font-medium">
+            Inicia sesión para guardar favoritos y realizar reservas.{" "}
+            <Link href="/auth/login" className="underline">
+              Iniciar sesión
+            </Link>{" "}
+            o{" "}
+            <Link href="/auth/registro" className="underline">
+              Registrarse
+            </Link>
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {properties.length > 0

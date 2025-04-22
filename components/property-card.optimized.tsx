@@ -1,11 +1,11 @@
 "use client"
 
-import Image from "next/image"
+import { memo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { MapPinIcon } from "lucide-react"
-import { memo } from "react"
+import { MapPinIcon } from "@/lib/optimized-imports"
+import { OptimizedImage } from "@/components/ui/optimized-image"
 
 interface PropertyCardProps {
   property: {
@@ -33,13 +33,13 @@ function PropertyCardComponent({ property, onClick }: PropertyCardProps) {
   return (
     <Card className="overflow-hidden group h-full">
       <div className="relative h-48 overflow-hidden">
-        <Image
-          src={imageSrc || "/placeholder.svg"}
+        <OptimizedImage
+          src={imageSrc}
           alt={property.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          loading="lazy"
+          lowQualityPlaceholder
         />
       </div>
       <CardContent className="p-6">

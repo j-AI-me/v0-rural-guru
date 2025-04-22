@@ -24,15 +24,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
+  const [supabase] = useState<ReturnType<typeof createBrowserClient>>(() => createBrowserClient())
 
   // Renderizar los children independientemente del estado de carga
   // para evitar problemas de hidratación
 
   // Inicializar Supabase solo en el lado del cliente
-  useEffect(() => {
-    setSupabase(createBrowserClient())
-  }, [])
 
   // Verificar si hay una sesión activa y suscribirse a cambios en la autenticación
   useEffect(() => {

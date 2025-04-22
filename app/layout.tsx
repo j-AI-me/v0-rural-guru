@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth/auth-provider"
+import { AppProvider } from "@/contexts/app-context"
 import SupabaseProvider from "./supabase-provider"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <SupabaseProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <AppProvider>{children}</AppProvider>
+            </AuthProvider>
           </SupabaseProvider>
         </ThemeProvider>
       </body>

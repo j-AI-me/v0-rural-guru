@@ -4,101 +4,80 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { getSupabaseBrowserClient } from "@/lib/supabase"
-import { Loader2 } from "lucide-react"
+import { FormContainer } from "@/components/ui/form-container"
+import { FormField } from "@/components/ui/form-field"
+import { useAuthentication } from "@/hooks/use-authentication"
+import { useFormValidation } from "@/hooks/use-form-validation"
+import { validationRules } from "@/lib/validation-rules"
 
 export function ResetPasswordForm() {
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+
+  const initialValues = {
+    email: "",
+  }
+
+  const validations = {
+    email: [
+      validationRules.required("El correo electrónico es obligatorio"),
+      validationRules.email("Introduce un correo electrónico válido"),
+    ],
+  }
+
+  const { values, errors, touched, handleChange, handleBlur, validateForm } = useFormValidation(
+    initialValues,
+    validations,
+  )
+
+  const { isLoading, error, resetPassword } = useAuthentication()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setSuccess(false)
-    setIsLoading(true)
 
-    try {
-      const supabase = getSupabaseBrowserClient()
+    // Validar el formulario antes de enviar
+    if (!validateForm()) {
+      return
+    }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/actualizar-password`,
-      })
-
-      if (error) {
-        throw error
-      }
-
+    const result = await resetPassword(values.email)
+    if (result.success) {
       setSuccess(true)
-    } catch (error: any) {
-      setError(error.message || "Error al enviar el correo de recuperación. Por favor, inténtalo de nuevo.")
-    } finally {
-      setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Recuperar contraseña</CardTitle>
-        <CardDescription>
-          Te enviaremos un correo electrónico con un enlace para restablecer tu contraseña
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert className="bg-green-50 text-green-800 border-green-200">
-              <AlertDescription>
-                Hemos enviado un correo electrónico a {email} con instrucciones para restablecer tu contraseña.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full bg-black hover:bg-gray-800" disabled={isLoading || success}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Enviando...
-              </>
-            ) : (
-              "Enviar instrucciones"
-            )}
-          </Button>
-
-          <div className="text-center text-sm">
-            <Link href="/auth/login" className="text-black hover:underline font-medium">
-              Volver a iniciar sesión
-            </Link>
-          </div>
-        </CardFooter>
-      </form>
-    </Card>
+    <FormContainer
+      title="Recuperar contraseña"
+      description="Te enviaremos un correo electrónico con un enlace para restablecer tu contraseña"
+      onSubmit={handleSubmit}
+      isSubmitting={isLoading}
+      error={error}
+      success={
+        success
+          ? `Hemos enviado un correo electrónico a ${values.email} con instrucciones para restablecer tu contraseña.`
+          : null
+      }
+      submitText="Enviar instrucciones"
+      footerContent={
+        <div className="text-center text-sm w-full mt-4">
+          <Link href="/auth/login" className="text-black hover:underline font-medium">
+            Volver a iniciar sesión
+          </Link>
+        </div>
+      }
+    >
+      <FormField
+        id="email"
+        label="Correo electrónico"
+        type="email"
+        placeholder="tu@email.com"
+        value={values.email}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.email}
+        touched={touched.email}
+        required
+      />
+    </FormContainer>
   )
 }

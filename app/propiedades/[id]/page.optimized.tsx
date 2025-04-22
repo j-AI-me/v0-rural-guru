@@ -1,14 +1,13 @@
-import Image from "next/image"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Suspense } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent } from "@/components/ui/card"
-import { PropertyGallery } from "@/components/property-gallery"
-import { BookingSystem } from "@/components/booking-system"
-import { ReviewList } from "@/components/reviews/review-list"
-import { ReviewSummary } from "@/components/reviews/review-summary"
-import { Bath, Bed, Coffee, Home, Info, MapPin, MessageSquare, Star, Users, Wifi, Wind } from "lucide-react"
+import { Bath, Bed, Coffee, Home, Info, MapPin, MessageSquare, Star, Users, Wifi, Wind } from "@/lib/optimized-imports"
 import { notFound } from "next/navigation"
 import { createServerClient } from "@/lib/supabase"
+import { DynamicPropertyGallery, DynamicBookingSystem, DynamicReviewList } from "@/components/dynamic-components"
+import { OptimizedImage } from "@/components/ui/optimized-image"
+import { ClientReviewSummary } from "./client-components"
 
 export default async function PropertyPage({ params }: { params: { id: string } }) {
   // Obtener la propiedad de la base de datos
@@ -60,7 +59,9 @@ export default async function PropertyPage({ params }: { params: { id: string } 
         </div>
       </div>
 
-      <PropertyGallery images={images} />
+      <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
+        <DynamicPropertyGallery images={images} />
+      </Suspense>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
         <div className="lg:col-span-2">
@@ -84,12 +85,13 @@ export default async function PropertyPage({ params }: { params: { id: string } 
                 </div>
               </div>
               <div className="flex-shrink-0">
-                <Image
+                <OptimizedImage
                   src="/placeholder-user.jpg"
                   alt="Anfitrión"
                   width={56}
                   height={56}
                   className="rounded-full border"
+                  lowQualityPlaceholder
                 />
               </div>
             </div>
@@ -147,7 +149,9 @@ export default async function PropertyPage({ params }: { params: { id: string } 
 
           {/* Sección de valoraciones */}
           <div className="py-6 border-b">
-            <ReviewList propertyId={params.id} />
+            <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
+              <DynamicReviewList propertyId={params.id} />
+            </Suspense>
           </div>
 
           <div className="py-6">
@@ -168,17 +172,19 @@ export default async function PropertyPage({ params }: { params: { id: string } 
           <div className="sticky top-8 space-y-6">
             <Card>
               <CardContent className="p-6">
-                <BookingSystem
-                  propertyId={property.id}
-                  propertyName={property.name}
-                  basePrice={property.price}
-                  maxGuests={property.max_guests}
-                />
+                <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
+                  <DynamicBookingSystem
+                    propertyId={property.id}
+                    propertyName={property.name}
+                    basePrice={property.price}
+                    maxGuests={property.max_guests}
+                  />
+                </Suspense>
               </CardContent>
             </Card>
 
-            {/* Resumen de valoraciones */}
-            <ReviewSummary propertyId={params.id} />
+            {/* Resumen de valoraciones - Ahora usando el componente cliente */}
+            <ClientReviewSummary propertyId={params.id} />
 
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -201,9 +207,9 @@ export default async function PropertyPage({ params }: { params: { id: string } 
                   <p className="text-sm text-gray-600 mt-1">
                     Contacta con el anfitrión para resolver cualquier duda antes de reservar.
                   </p>
-                  <Button variant="outline" className="mt-2 w-full">
+                  <button className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
                     Contactar con el anfitrión
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>

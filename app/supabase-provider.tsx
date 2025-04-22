@@ -17,23 +17,19 @@ export default function SupabaseProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [supabase, setSupabase] = useState<ReturnType<typeof createBrowserClient> | null>(null)
+  const [supabase] = useState<ReturnType<typeof createBrowserClient>>(() => createBrowserClient())
   const router = useRouter()
 
-  // Inicializar Supabase solo en el lado del cliente
   useEffect(() => {
-    const client = createBrowserClient()
-    setSupabase(client)
-
     // Escuchar cambios de autenticación para refrescar la página
-    const { data: authListener } = client.auth.onAuthStateChange(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
       router.refresh()
     })
 
     return () => {
       authListener?.subscription.unsubscribe()
     }
-  }, [router])
+  }, [router, supabase])
 
   return <Context.Provider value={{ supabase }}>{children}</Context.Provider>
 }

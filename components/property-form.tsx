@@ -2,16 +2,12 @@
 
 import type React from "react"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getSupabaseBrowserClient } from "@/lib/supabase"
-import { Loader2 } from "lucide-react"
+import { FormContainer } from "@/components/ui/form-container"
+import { FormField } from "@/components/ui/form-field"
+import { useFormState } from "@/hooks/use-form-state"
+import { useFormValidation } from "@/hooks/use-form-validation"
+import { validationRules } from "@/lib/validation-rules"
 
 interface Property {
   id: string
@@ -33,8 +29,8 @@ interface PropertyFormProps {
 
 export function PropertyForm({ property }: PropertyFormProps) {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+
+  const initialValues = {
     title: property?.title || "",
     description: property?.description || "",
     long_description: property?.long_description || "",
@@ -44,37 +40,81 @@ export function PropertyForm({ property }: PropertyFormProps) {
     bathrooms: property?.bathrooms?.toString() || "",
     capacity: property?.capacity?.toString() || "",
     status: property?.status || "active",
+  }
+
+  const validations = {
+    title: [
+      validationRules.required("El título es obligatorio"),
+      validationRules.minLength(5, "El título debe tener al menos 5 caracteres"),
+      validationRules.maxLength(100, "El título debe tener como máximo 100 caracteres"),
+    ],
+    description: [
+      validationRules.required("La descripción es obligatoria"),
+      validationRules.minLength(10, "La descripción debe tener al menos 10 caracteres"),
+    ],
+    location: [validationRules.required("La ubicación es obligatoria")],
+    price: [
+      validationRules.required("El precio es obligatorio"),
+      validationRules.numeric("El precio debe ser un valor numérico"),
+      validationRules.min(1, "El precio debe ser mayor que 0"),
+    ],
+    bedrooms: [
+      validationRules.required("El número de dormitorios es obligatorio"),
+      validationRules.integer("El número de dormitorios debe ser un número entero"),
+      validationRules.min(0, "El número de dormitorios no puede ser negativo"),
+    ],
+    bathrooms: [
+      validationRules.required("El número de baños es obligatorio"),
+      validationRules.integer("El número de baños debe ser un número entero"),
+      validationRules.min(0, "El número de baños no puede ser negativo"),
+    ],
+    capacity: [
+      validationRules.required("La capacidad es obligatoria"),
+      validationRules.integer("La capacidad debe ser un número entero"),
+      validationRules.min(1, "La capacidad debe ser al menos 1"),
+    ],
+    status: [validationRules.required("El estado es obligatorio")],
+  }
+
+  const { values, errors, touched, handleChange, handleBlur, handleSelectChange, validateForm } = useFormValidation(
+    initialValues,
+    validations,
+  )
+
+  const { error, success, isSubmitting, processSubmit, supabase } = useFormState({
+    initialState: {},
+    successMessage: property ? "Propiedad actualizada correctamente" : "Propiedad creada correctamente",
+    onSuccess: () => {
+      router.push("/dashboard/properties")
+      router.refresh()
+    },
   })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
 
-    try {
-      const supabase = getSupabaseBrowserClient()
+    // Validar el formulario antes de enviar
+    if (!validateForm()) {
+      return
+    }
 
+    await processSubmit(async () => {
       // Convertir valores numéricos
       const propertyData = {
-        ...formData,
-        price: Number.parseFloat(formData.price),
-        bedrooms: Number.parseInt(formData.bedrooms),
-        bathrooms: Number.parseInt(formData.bathrooms),
-        capacity: Number.parseInt(formData.capacity),
+        title: values.title,
+        description: values.description,
+        long_description: values.long_description,
+        location: values.location,
+        price: Number.parseFloat(values.price),
+        bedrooms: Number.parseInt(values.bedrooms),
+        bathrooms: Number.parseInt(values.bathrooms),
+        capacity: Number.parseInt(values.capacity),
+        status: values.status,
       }
 
       if (property?.id) {
         // Actualizar propiedad existente
         const { error } = await supabase.from("properties").update(propertyData).eq("id", property.id)
-
         if (error) throw error
       } else {
         // Crear nueva propiedad
@@ -84,174 +124,153 @@ export function PropertyForm({ property }: PropertyFormProps) {
             amenities: ["Wifi gratis", "Cocina completa", "Calefacción"], // Valores por defecto
           },
         ])
-
         if (error) throw error
       }
-
-      // Redireccionar a la lista de propiedades
-      router.push("/dashboard/properties")
-      router.refresh()
-    } catch (error) {
-      console.error("Error saving property:", error)
-      alert("Error al guardar la propiedad. Por favor, inténtalo de nuevo.")
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
+  const statusOptions = [
+    { value: "active", label: "Activo" },
+    { value: "maintenance", label: "Mantenimiento" },
+    { value: "inactive", label: "Inactivo" },
+  ]
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{property ? "Editar propiedad" : "Nueva propiedad"}</CardTitle>
-        <CardDescription>
-          {property
-            ? "Modifica los detalles de tu propiedad."
-            : "Introduce los detalles de la nueva propiedad que quieres añadir a tu catálogo."}
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Título</Label>
-            <Input
-              id="title"
-              name="title"
-              placeholder="Ej: Casa rural en Covadonga"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <FormContainer
+      title={property ? "Editar propiedad" : "Nueva propiedad"}
+      description={
+        property
+          ? "Modifica los detalles de tu propiedad."
+          : "Introduce los detalles de la nueva propiedad que quieres añadir a tu catálogo."
+      }
+      onSubmit={handleSubmit}
+      onCancel={() => router.back()}
+      isSubmitting={isSubmitting}
+      error={error}
+      success={success}
+    >
+      <FormField
+        id="title"
+        label="Título"
+        placeholder="Ej: Casa rural en Covadonga"
+        value={values.title}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.title}
+        touched={touched.title}
+        required
+      />
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descripción corta</Label>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Breve descripción de la propiedad"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <FormField
+        id="description"
+        label="Descripción corta"
+        type="textarea"
+        placeholder="Breve descripción de la propiedad"
+        value={values.description}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.description}
+        touched={touched.description}
+        required
+      />
 
-          <div className="space-y-2">
-            <Label htmlFor="long_description">Descripción detallada</Label>
-            <Textarea
-              id="long_description"
-              name="long_description"
-              placeholder="Descripción completa con todos los detalles de la propiedad"
-              value={formData.long_description || ""}
-              onChange={handleChange}
-              className="min-h-[150px]"
-            />
-          </div>
+      <FormField
+        id="long_description"
+        label="Descripción detallada"
+        type="textarea"
+        placeholder="Descripción completa con todos los detalles de la propiedad"
+        value={values.long_description}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.long_description}
+        touched={touched.long_description}
+        className="min-h-[150px]"
+      />
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Ubicación</Label>
-            <Input
-              id="location"
-              name="location"
-              placeholder="Ej: Covadonga, Asturias"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </div>
+      <FormField
+        id="location"
+        label="Ubicación"
+        placeholder="Ej: Covadonga, Asturias"
+        value={values.location}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.location}
+        touched={touched.location}
+        required
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="price">Precio por noche (€)</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Ej: 120"
-                value={formData.price}
-                onChange={handleChange}
-                required
-              />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <FormField
+          id="price"
+          label="Precio por noche (€)"
+          type="number"
+          placeholder="Ej: 120"
+          value={values.price}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.price}
+          touched={touched.price}
+          min={0}
+          step={0.01}
+          required
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Estado</Label>
-              <Select value={formData.status} onValueChange={(value) => handleSelectChange("status", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Activo</SelectItem>
-                  <SelectItem value="maintenance">Mantenimiento</SelectItem>
-                  <SelectItem value="inactive">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <FormField
+          id="status"
+          label="Estado"
+          type="select"
+          value={values.status}
+          onSelectChange={(value) => handleSelectChange("status", value)}
+          onBlur={handleBlur}
+          error={errors.status}
+          touched={touched.status}
+          options={statusOptions}
+        />
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="bedrooms">Dormitorios</Label>
-              <Input
-                id="bedrooms"
-                name="bedrooms"
-                type="number"
-                min="0"
-                placeholder="Ej: 3"
-                value={formData.bedrooms}
-                onChange={handleChange}
-                required
-              />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <FormField
+          id="bedrooms"
+          label="Dormitorios"
+          type="number"
+          placeholder="Ej: 3"
+          value={values.bedrooms}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.bedrooms}
+          touched={touched.bedrooms}
+          min={0}
+          required
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="bathrooms">Baños</Label>
-              <Input
-                id="bathrooms"
-                name="bathrooms"
-                type="number"
-                min="0"
-                placeholder="Ej: 2"
-                value={formData.bathrooms}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <FormField
+          id="bathrooms"
+          label="Baños"
+          type="number"
+          placeholder="Ej: 2"
+          value={values.bathrooms}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.bathrooms}
+          touched={touched.bathrooms}
+          min={0}
+          required
+        />
 
-            <div className="space-y-2">
-              <Label htmlFor="capacity">Capacidad (personas)</Label>
-              <Input
-                id="capacity"
-                name="capacity"
-                type="number"
-                min="1"
-                placeholder="Ej: 6"
-                value={formData.capacity}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline" type="button" onClick={() => router.back()}>
-            Cancelar
-          </Button>
-          <Button type="submit" className="bg-black hover:bg-gray-800" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Guardando...
-              </>
-            ) : property ? (
-              "Actualizar propiedad"
-            ) : (
-              "Guardar propiedad"
-            )}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+        <FormField
+          id="capacity"
+          label="Capacidad (personas)"
+          type="number"
+          placeholder="Ej: 6"
+          value={values.capacity}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={errors.capacity}
+          touched={touched.capacity}
+          min={1}
+          required
+        />
+      </div>
+    </FormContainer>
   )
 }
