@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import dynamic from "next/dynamic"
 import { Suspense } from "react"
+import dynamic from "next/dynamic"
 
 // Import the AppProvider dynamically with ssr: false
 const AppProviderDynamic = dynamic(() => import("@/contexts/app-context").then((mod) => mod.AppProvider), {

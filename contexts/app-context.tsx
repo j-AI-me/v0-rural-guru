@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
 import { useAuth } from "@/components/auth/auth-provider"
 
@@ -24,7 +24,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([])
   const [notifications, setNotifications] = useState<any[]>([])
   const { user } = useAuth()
-  const [supabaseClient] = useState(() => getSupabaseBrowserClient())
+  const supabaseClient = useMemo(() => getSupabaseBrowserClient(), [])
 
   // Cargar favoritos del usuario
   useEffect(() => {
