@@ -36,25 +36,6 @@ const nextConfig = {
     },
   },
 
-  // Configuración experimental
-  experimental: {
-    // Optimización de fuentes
-    optimizeFonts: true,
-    // Habilitar ISR para mejor rendimiento y SEO
-    isrMemoryCacheSize: 50,
-    // Optimización de imágenes
-    optimizeImages: true,
-    // Optimización de CSS
-    optimizeCss: true,
-  },
-
-  // Configuración de generación estática incremental (ISR)
-  // Esto permite regenerar páginas en segundo plano
-  async generateStaticParams() {
-    // Aquí puedes definir rutas para pre-renderizar
-    return [];
-  },
-
   // Configuración de rutas con ISR
   async rewrites() {
     return [
