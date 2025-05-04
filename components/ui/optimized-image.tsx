@@ -1,87 +1,100 @@
 "use client"
 
-import Image, { type ImageProps } from "next/image"
+import Image from "next/image"
 import { useState, useEffect } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useInView } from "react-intersection-observer"
 
-interface OptimizedImageProps extends Omit<ImageProps, "onLoad" | "onError"> {
-  fallbackSrc?: string
-  showLoadingIndicator?: boolean
-  aspectRatio?: number
+interface OptimizedImageProps {
+  src: string
+  alt: string
+  width?: number
+  height?: number
+  priority?: boolean
+  className?: string
+  sizes?: string
+  quality?: number
+  fill?: boolean
+  placeholder?: "blur" | "empty"
+  blurDataURL?: string
+  onLoad?: () => void
   lowQualityPlaceholder?: boolean
-  lazyBoundary?: string
 }
 
+// Componente principal
 export function OptimizedImage({
   src,
   alt,
-  fallbackSrc = "/placeholder.svg",
-  showLoadingIndicator = true,
-  aspectRatio,
+  width,
+  height,
+  priority = false,
+  className = "",
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+  quality = 75,
+  fill = false,
+  placeholder = "empty",
+  blurDataURL,
+  onLoad,
   lowQualityPlaceholder = false,
-  lazyBoundary = "200px",
-  className,
-  ...props
 }: OptimizedImageProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [imageSrc, setImageSrc] = useState(src)
-  const [blurDataURL, setBlurDataURL] = useState<string | undefined>(undefined)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    rootMargin: "200px 0px",
+  })
 
-  // Restablecer el estado cuando cambia la fuente
-  useEffect(() => {
-    setIsLoading(true)
-    setError(false)
-    setImageSrc(src)
-  }, [src])
+  // Generar un placeholder blur data URL si no se proporciona uno
+  const [localBlurDataURL, setLocalBlurDataURL] = useState(blurDataURL)
 
-  // Generar un placeholder de baja calidad si se solicita
   useEffect(() => {
-    if (lowQualityPlaceholder && typeof src === "string") {
-      // Crear un placeholder de baja calidad (10x10 píxeles)
-      const canvas = document.createElement("canvas")
-      canvas.width = 10
-      canvas.height = 10
-      const ctx = canvas.getContext("2d")
-      if (ctx) {
-        ctx.fillStyle = "#f3f4f6" // Color gris claro
-        ctx.fillRect(0, 0, 10, 10)
-        setBlurDataURL(canvas.toDataURL())
-      }
+    if (!blurDataURL && placeholder === "blur" && !localBlurDataURL) {
+      // Crear un SVG simple como placeholder
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width || 100}" height="${height || 100}">
+          <rect width="100%" height="100%" fill="#e2e8f0"/>
+        </svg>
+      `
+      const encodedSVG = encodeURIComponent(svg)
+      setLocalBlurDataURL(`data:image/svg+xml;charset=utf-8,${encodedSVG}`)
     }
-  }, [lowQualityPlaceholder, src])
+  }, [blurDataURL, placeholder, width, height, localBlurDataURL])
 
-  // Calcular el estilo para mantener la relación de aspecto
-  const aspectRatioStyle = aspectRatio
-    ? {
-        aspectRatio: `${aspectRatio}`,
-        objectFit: "cover" as const,
-      }
-    : {}
+  // Manejar la carga de la imagen
+  const handleLoad = () => {
+    setIsLoaded(true)
+    if (onLoad) onLoad()
+  }
 
   return (
-    <div className="relative" style={aspectRatioStyle}>
-      {showLoadingIndicator && isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse">
-          <Skeleton className="w-full h-full" />
-        </div>
+    <div
+      ref={ref}
+      className={`relative overflow-hidden ${className}`}
+      style={fill ? { width: "100%", height: "100%" } : {}}
+    >
+      {(inView || priority) && (
+        <Image
+          src={src || "/placeholder.svg"}
+          alt={alt}
+          width={fill ? undefined : width}
+          height={fill ? undefined : height}
+          quality={quality}
+          sizes={sizes}
+          priority={priority}
+          fill={fill}
+          placeholder={placeholder === "blur" ? "blur" : "empty"}
+          blurDataURL={localBlurDataURL}
+          onLoad={handleLoad}
+          className={`transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        />
       )}
-      <Image
-        src={error ? fallbackSrc : imageSrc}
-        alt={alt}
-        className={`transition-opacity duration-300 ${isLoading ? "opacity-0" : "opacity-100"} ${className}`}
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setError(true)
-          setIsLoading(false)
-          setImageSrc(fallbackSrc)
-        }}
-        loading="lazy"
-        placeholder={blurDataURL ? "blur" : "empty"}
-        blurDataURL={blurDataURL}
-        lazyBoundary={lazyBoundary}
-        {...props}
-      />
+      {!isLoaded && lowQualityPlaceholder && (
+        <div
+          className="absolute inset-0 bg-gray-200 animate-pulse"
+          style={{ aspectRatio: width && height ? width / height : undefined }}
+        />
+      )}
     </div>
   )
 }
+
+// También exportamos como default para mantener compatibilidad con código existente
+export default OptimizedImage

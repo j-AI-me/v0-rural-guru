@@ -1,97 +1,46 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Script from "next/script"
 
 interface ThirdPartyScriptProps {
   src: string
   id?: string
-  async?: boolean
-  defer?: boolean
-  onLoad?: () => void
-  onError?: (error: Error) => void
   strategy?: "beforeInteractive" | "afterInteractive" | "lazyOnload"
+  onLoad?: () => void
+  defer?: boolean
+  async?: boolean
 }
 
-export function ThirdPartyScript({
+export default function ThirdPartyScript({
   src,
   id,
-  async = true,
-  defer = false,
+  strategy = "lazyOnload",
   onLoad,
-  onError,
-  strategy = "afterInteractive",
+  defer = true,
+  async = true,
 }: ThirdPartyScriptProps) {
-  const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Manejar la carga del script
+  const handleLoad = () => {
+    setIsLoaded(true)
+    if (onLoad) onLoad()
+  }
+
+  // Verificar si el usuario ha dado consentimiento para cookies (ejemplo)
+  const [hasConsent, setHasConsent] = useState(false)
 
   useEffect(() => {
-    // Si el script ya existe, no lo cargamos de nuevo
-    const existingScript = document.getElementById(id || src)
-    if (existingScript) {
-      setLoaded(true)
-      onLoad?.()
-      return
-    }
+    // Comprobar si el usuario ha dado consentimiento para cookies
+    const cookieConsent = localStorage.getItem("cookieConsent")
+    setHasConsent(cookieConsent === "true")
+  }, [])
 
-    // Si la estrategia es lazyOnload, usamos Intersection Observer
-    if (strategy === "lazyOnload") {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            loadScript()
-            observer.disconnect()
-          }
-        },
-        { rootMargin: "200px" },
-      )
+  // No cargar scripts de terceros si el usuario no ha dado consentimiento
+  if (!hasConsent && strategy !== "beforeInteractive") {
+    return null
+  }
 
-      const target = document.body
-      observer.observe(target)
-
-      return () => {
-        observer.disconnect()
-      }
-    }
-
-    // Si la estrategia es beforeInteractive, cargamos inmediatamente
-    if (strategy === "beforeInteractive") {
-      loadScript()
-      return
-    }
-
-    // Si la estrategia es afterInteractive, cargamos después de que la página sea interactiva
-    if (strategy === "afterInteractive") {
-      if (document.readyState === "complete") {
-        loadScript()
-      } else {
-        window.addEventListener("load", loadScript)
-        return () => {
-          window.removeEventListener("load", loadScript)
-        }
-      }
-    }
-
-    function loadScript() {
-      const script = document.createElement("script")
-      script.src = src
-      script.async = async
-      script.defer = defer
-      if (id) script.id = id
-
-      script.onload = () => {
-        setLoaded(true)
-        onLoad?.()
-      }
-
-      script.onerror = (e) => {
-        const err = new Error(`Failed to load script: ${src}`)
-        setError(err)
-        onError?.(err)
-      }
-
-      document.body.appendChild(script)
-    }
-  }, [src, id, async, defer, onLoad, onError, strategy])
-
-  return null
+  return <Script src={src} id={id} strategy={strategy} onLoad={handleLoad} defer={defer} async={async} />
 }
