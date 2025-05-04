@@ -7,7 +7,11 @@ import { AuthProvider } from "@/components/auth/auth-provider"
 import { AppProvider } from "@/contexts/app-context"
 import SupabaseProvider from "./supabase-provider"
 
-const inter = Inter({ subsets: ["latin"] })
+// Optimizar la carga de fuentes
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "RuralGuru - Alojamientos rurales en Asturias",

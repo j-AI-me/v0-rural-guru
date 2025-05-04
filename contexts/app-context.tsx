@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
+
 import { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
 import { useAuth } from "@/components/auth/auth-provider"
 
+// Definición del contexto
 interface AppContextProps {
   favorites: string[]
   addFavorite: (propertyId: string) => Promise<void>
@@ -19,11 +21,14 @@ interface AppContextProps {
 
 const AppContext = createContext<AppContextProps | undefined>(undefined)
 
+// Versión simplificada y optimizada del provider
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([])
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([])
   const [notifications, setNotifications] = useState<any[]>([])
   const { user } = useAuth()
+
+  // Memoizar el cliente de Supabase para evitar recreaciones
   const supabaseClient = useMemo(() => getSupabaseBrowserClient(), [])
 
   // Cargar favoritos del usuario
@@ -32,7 +37,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function loadFavorites() {
       if (!user) {
-        setFavorites([])
+        if (isMounted) setFavorites([])
         return
       }
 
@@ -62,7 +67,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     async function loadNotifications() {
       if (!user) {
-        setNotifications([])
+        if (isMounted) setNotifications([])
         return
       }
 
@@ -90,7 +95,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, supabaseClient])
 
-  // Añadir a favoritos
+  // Funciones simplificadas
   const addFavorite = async (propertyId: string) => {
     if (!user) return
 
@@ -105,7 +110,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Eliminar de favoritos
   const removeFavorite = async (propertyId: string) => {
     if (!user) return
 
@@ -124,12 +128,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Verificar si es favorito
   const isFavorite = (propertyId: string) => {
     return favorites.includes(propertyId)
   }
 
-  // Añadir a recientemente vistos
   const addRecentlyViewed = (propertyId: string) => {
     setRecentlyViewed((prev) => {
       const filtered = prev.filter((id) => id !== propertyId)
@@ -137,7 +139,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  // Marcar notificación como leída
   const markNotificationAsRead = async (notificationId: string) => {
     if (!user) return
 
@@ -159,23 +160,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Contar notificaciones no leídas
   const unreadNotificationsCount = notifications.filter((notification) => !notification.read).length
 
-  return (
-    <AppContext.Provider
-      value={{
-        favorites,
-        addFavorite,
-        removeFavorite,
-        isFavorite,
-        recentlyViewed,
-        addRecentlyViewed,
-        notifications,
-        unreadNotificationsCount,
-        markNotificationAsRead,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  )
+  // Valor del contexto
+  const contextValue = {
+    favorites,
+    addFavorite,
+    removeFavorite,
+    isFavorite,
+    recentlyViewed,
+    addRecentlyViewed,
+    notifications,
+    unreadNotificationsCount,
+    markNotificationAsRead,
+  }
+
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
 }
 
 export function useApp() {

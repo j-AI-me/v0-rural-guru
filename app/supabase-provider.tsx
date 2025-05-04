@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useState, useEffect } from "react"
 import { createBrowserClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 
@@ -17,7 +17,8 @@ export default function SupabaseProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [supabase] = useState<ReturnType<typeof createBrowserClient>>(() => createBrowserClient())
+  // Crear el cliente una sola vez y memoizarlo
+  const [supabase] = useState(() => createBrowserClient())
   const router = useRouter()
 
   useEffect(() => {
